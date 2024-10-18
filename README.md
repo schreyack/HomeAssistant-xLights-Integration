@@ -16,4 +16,4 @@ The examples contain your Node-RED flows along with example code to use for each
 
 In the event you have trouble - add a debug node in the flow and watch the debug output to see what is going wrong.
 
-On the xLights side, you will add you HA instance IP address just like any other controller.  Make sure you enable Dedup and disable Monitor.
+On the xLights side, you will add your HA instance IP address just like any other controller.  Make sure you enable Dedup and disable Monitor.
