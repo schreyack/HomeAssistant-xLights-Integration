@@ -1,0 +1,202 @@
+[
+    {
+        "id": "2567173b59f28a64",
+        "type": "sacn_in",
+        "z": "1213942036c3eae6",
+        "name": "Universe 600",
+        "universe": "600",
+        "interval": "10",
+        "x": 150,
+        "y": 640,
+        "wires": [
+            [
+                "740e473e5b99fd61",
+                "7ec58827.67bf78",
+                "3ed58bd0b5d2b9fd"
+            ]
+        ]
+    },
+    {
+        "id": "189d52df0f1483c0",
+        "type": "comment",
+        "z": "1213942036c3eae6",
+        "name": "Set as Xlights Universe",
+        "info": "",
+        "x": 160,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "63a4073c6856585a",
+        "type": "comment",
+        "z": "1213942036c3eae6",
+        "name": "Blocks Duplicate Messages",
+        "info": "Because SACN is super chatty. (AKA streaming protocol)",
+        "x": 780,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "5f4ad7c0dd1adee1",
+        "type": "rbe",
+        "z": "1213942036c3eae6",
+        "name": "",
+        "func": "rbei",
+        "gap": "",
+        "start": "",
+        "inout": "out",
+        "septopics": true,
+        "property": "payload",
+        "topi": "topic",
+        "x": 750,
+        "y": 480,
+        "wires": [
+            [
+                "16c7d458d0cadf8c"
+            ]
+        ]
+    },
+    {
+        "id": "16c7d458d0cadf8c",
+        "type": "api-call-service",
+        "z": "1213942036c3eae6",
+        "name": "Light",
+        "server": "59e20da1.698de4",
+        "version": 7,
+        "debugenabled": false,
+        "action": "light.{{payload.service}}",
+        "floorId": [],
+        "areaId": [],
+        "deviceId": [],
+        "entityId": [
+            "{{payload.entity_id}}"
+        ],
+        "labelId": [],
+        "data": "{\"rgb_color\": payload.rgb_color}",
+        "dataType": "jsonata",
+        "mergeContext": "",
+        "mustacheAltTags": false,
+        "outputProperties": [
+            {
+                "property": "payload",
+                "propertyType": "msg",
+                "value": "",
+                "valueType": "data"
+            }
+        ],
+        "queue": "none",
+        "blockInputOverrides": false,
+        "domain": "light",
+        "service": "{{payload",
+        "x": 910,
+        "y": 480,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "740e473e5b99fd61",
+        "type": "function",
+        "z": "1213942036c3eae6",
+        "name": "Convert E1.31 Data channels to HA Script Domain",
+        "func": "//Xlights - HA Script\n\n//Channels 1-3 - Light #1  These start from 0, not 1\n// Easiest way is the end channel of the previous node in Xlights\n// Is the ID of the current node\n// Note: You can access any domain in HA for simplicity, it's easier to create a separate node for each domain\n// HOWEVER - you need to make sure you use unique channels - these are your xLights channels.  And they always go in up by 3.\n\nconst channel_to_ha_mapping = { \n    '0': 'script.light_show_exterior_off', \n    '3': 'script.light_show_exterior_on',\n    '36': 'script.led_controller_on',\n    '39': 'script.led_controller_garage_on',\n    '42': 'script.led_show_audio_on',\n    '45': 'script.led_matrix_power_on',\n    '48': 'script.led_roof_power_on',\n    '51': 'script.led_show_audio_off',\n    '54': 'script.led_matrix_power_off',\n    '57': 'script.led_tree_power_on',\n    '60': 'script.led_tree_power_off',\n    '63': 'script.led_full_show_power_on',\n    '66': 'script.led_full_show_power_off',\n    '69': 'script.led_standard_show_power_on',\n    '72': 'script.led_standard_show_power_off',\n    '75': 'script.led_show_subwoofer_on',\n    '78': 'script.led_show_subwoofer_off',\n    '81': 'script.led_play_live_pre_show',\n    '84': 'script.led_play_live_show',\n    '87': 'script.led_stop_live_show',\n    };\nvar data = [];\nvar message = msg.payload;\n\nfor (const channel in channel_to_ha_mapping) {\n    const channel_id = parseInt(channel);\n    if (message[channel_id] > 0 || message[channel_id + 1] > 0 || message[channel_id+2] > 0 ) {\n        data.push(\n            {\n                topic: channel_to_ha_mapping[channel],\n                payload: \n                {  \n                  service: \"turn_on\", \n                  entity_id: channel_to_ha_mapping[channel], \n                } \n            }\n        );\n    }\n    // else {\n    //     data.push(\n    //         {\n    //             topic: channel_to_ha_mapping[channel],\n    //             payload:\n    //             {\n    //                 service: \"turn_off\",\n    //                 entity_id: channel_to_ha_mapping[channel],\n    //             }\n    //         }\n    //     );\n\n    // }\n}    \n\nreturn [data];",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 470,
+        "y": 640,
+        "wires": [
+            [
+                "75d9dd70f9f898c2"
+            ]
+        ]
+    },
+    {
+        "id": "75d9dd70f9f898c2",
+        "type": "api-call-service",
+        "z": "1213942036c3eae6",
+        "name": "Script",
+        "server": "59e20da1.698de4",
+        "version": 7,
+        "debugenabled": false,
+        "action": "script.{{payload.service}}",
+        "floorId": [],
+        "areaId": [],
+        "deviceId": [],
+        "entityId": [
+            "{{payload.entity_id}}"
+        ],
+        "labelId": [],
+        "data": "",
+        "dataType": "jsonata",
+        "mergeContext": "",
+        "mustacheAltTags": false,
+        "outputProperties": [
+            {
+                "property": "payload",
+                "propertyType": "msg",
+                "value": "",
+                "valueType": "data"
+            }
+        ],
+        "queue": "none",
+        "blockInputOverrides": false,
+        "domain": "script",
+        "service": "{{payload.service}}",
+        "x": 910,
+        "y": 640,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "7ec58827.67bf78",
+        "type": "function",
+        "z": "1213942036c3eae6",
+        "name": "Convert E1.31 Data channels to HA Light Domain",
+        "func": "//Xlights - HA Light\n\n//Channels 1-3 - Light #1  These start from 0, not 1\n// Easiest way is the end channel of the previous node in Xlights\n// Is the ID of the current node\n// Note: You can access any domain in HA for simplicity, it's easier to create a separate node for each domain\n// HOWEVER - you need to make sure you use unique channels - these are your xLights channels.  And they always go in up by 3.\n\nconst channel_to_ha_mapping = {\n    '6': 'light.outdoor_pillar_66',\n    '9': 'light.outdoor_pillar_65',\n    '12': 'light.outdoor_pillar_67',\n    '15': 'light.outdoor_pillar_58',\n    '18': 'light.outdoor_pillar_80',\n    '21': 'light.outdoor_pillar_85',\n    '24': 'light.outdoor_pillar_60',\n    '27': 'light.outdoor_pillar_62',\n};\nvar data = [];\nvar message = msg.payload;\n\nfor (const channel in channel_to_ha_mapping) {\n    const channel_id = parseInt(channel);\n    if (message[channel_id] > 0 || message[channel_id + 1] > 0 || message[channel_id + 2] > 0) {\n        data.push(\n            {\n                topic: channel_to_ha_mapping[channel],\n                payload:\n                {\n                    service: \"turn_on\",\n                    entity_id: channel_to_ha_mapping[channel],\n                    rgb_color: [message[channel_id], message[channel_id + 1], message[channel_id + 2]]\n                }\n            }\n        );\n    }\n    else {\n        data.push({\n            topic: channel_to_ha_mapping[channel],\n            payload:\n            {\n                service: \"turn_off\",\n                entity_id: channel_to_ha_mapping[channel],\n            }\n        }\n        );\n    }\n}\n\nreturn [data];",
+        "outputs": 8,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 470,
+        "y": 480,
+        "wires": [
+            [
+                "5f4ad7c0dd1adee1"
+            ],
+            [
+                "5f4ad7c0dd1adee1"
+            ],
+            [
+                "5f4ad7c0dd1adee1"
+            ],
+            [
+                "5f4ad7c0dd1adee1"
+            ],
+            [
+                "5f4ad7c0dd1adee1"
+            ],
+            [
+                "5f4ad7c0dd1adee1"
+            ],
+            [
+                "5f4ad7c0dd1adee1"
+            ],
+            [
+                "5f4ad7c0dd1adee1"
+            ]
+        ]
+    },
+    {
+        "id": "59e20da1.698de4",
+        "type": "server",
+        "name": "Home Assistant",
+        "addon": true
+    }
+]
