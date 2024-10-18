@@ -15,3 +15,5 @@ node-red-contrib-sacn-in
 The examples contain your Node-RED flows along with example code to use for each domain.  In my case, I have HA set to xlights universe 600.  Set that to whatever you prefer in your case.
 
 In the event you have trouble - add a debug node in the flow and watch the debug output to see what is going wrong.
+
+On the xLights side, you will add you HA instance IP address just like any other controller.  Make sure you enable Dedup and disable Monitor.
